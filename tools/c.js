@@ -1,0 +1,192 @@
+/**
+ * @license cajon 0.0.1 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/requirejs/cajon for details
+ */
+
+/*jslint sloppy: true, regexp: true */
+/*global location, XMLHttpRequest, ActiveXObject, process, require, Packages,
+java, requirejs */
+var cajon = requirejs;
+(function (requirejs) {
+    var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
+        defineRegExp = /(^|[^\.])define\s*\(/,
+        requireRegExp = /(^|[^\.])require\s*\(\s*['"][^'"]+['"]\s*\)/,
+        exportsRegExp = /exports\s*=\s*/,
+        progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
+        hasLocation = typeof location !== 'undefined' && location.href,
+        defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, ''),
+        defaultHostName = hasLocation && location.hostname,
+        defaultPort = hasLocation && (location.port || undefined),
+        oldLoad = requirejs.load,
+        fs;
+
+    cajon.version = '0.0.1';
+    cajon.createXhr = function () {
+        //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
+        var xhr, i, progId;
+        if (typeof XMLHttpRequest !== "undefined") {
+            return new XMLHttpRequest();
+        } else if (typeof ActiveXObject !== "undefined") {
+            for (i = 0; i < 3; i += 1) {
+                progId = progIds[i];
+                try {
+                    xhr = new ActiveXObject(progId);
+                } catch (e) {}
+
+                if (xhr) {
+                    progIds = [progId];  // so faster next time
+                    break;
+                }
+            }
+        }
+
+        return xhr;
+    };
+
+    cajon.xdRegExp = /^((\w+)\:)?\/\/([^\/\\]+)/;
+
+    /**
+     * Is an URL on another domain. Only works for browser use, returns
+     * false in non-browser environments. Only used to know if an
+     * optimized .js version of a text resource should be loaded
+     * instead.
+     * @param {String} url
+     * @returns Boolean
+     */
+    cajon.useXhr = function (url, protocol, hostname, port) {
+        var match = cajon.xdRegExp.exec(url),
+            uProtocol, uHostName, uPort;
+        if (!match) {
+            return true;
+        }
+        uProtocol = match[2];
+        uHostName = match[3];
+
+        uHostName = uHostName.split(':');
+        uPort = uHostName[1];
+        uHostName = uHostName[0];
+
+        return (!uProtocol || uProtocol === protocol) &&
+               (!uHostName || uHostName === hostname) &&
+               ((!uPort && !uHostName) || uPort === port);
+    };
+
+    if (typeof process !== "undefined" &&
+             process.versions &&
+             !!process.versions.node) {
+        //Using special require.nodeRequire, something added by r.js.
+        fs = require.nodeRequire('fs');
+
+        cajon.cget = function (url, callback) {
+            var file = fs.readFileSync(url, 'utf8');
+            //Remove BOM (Byte Mark Order) from utf8 files if it is there.
+            if (file.indexOf('\uFEFF') === 0) {
+                file = file.substring(1);
+            }
+            callback(file);
+        };
+    } else if (cajon.createXhr()) {
+        cajon.cget = function (url, callback, errback, onXhr) {
+            var xhr = cajon.createXhr();
+            xhr.open('GET', url, true);
+
+            //Allow overrides specified in config
+            if (onXhr) {
+                onXhr(xhr, url);
+            }
+
+            xhr.onreadystatechange = function (evt) {
+                var status, err;
+                //Do not explicitly handle errors, those should be
+                //visible via console output in the browser.
+                if (xhr.readyState === 4) {
+                    status = xhr.status;
+                    if (status > 399 && status < 600) {
+                        //An http 4xx or 5xx error. Signal an error.
+                        err = new Error(url + ' HTTP status: ' + status);
+                        err.xhr = xhr;
+                        errback(err);
+                    } else {
+                        callback(xhr.responseText);
+                    }
+                }
+            };
+            xhr.send(null);
+        };
+    } else if (typeof Packages !== 'undefined') {
+        //Why Java, why is this so awkward?
+        cajon.cget = function (url, callback) {
+            var encoding = "utf-8",
+                file = new java.io.File(url),
+                lineSeparator = java.lang.System.getProperty("line.separator"),
+                input = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file), encoding)),
+                stringBuffer, line,
+                content = '';
+            try {
+                stringBuffer = new java.lang.StringBuffer();
+                line = input.readLine();
+
+                // Byte Order Mark (BOM) - The Unicode Standard, version 3.0, page 324
+                // http://www.unicode.org/faq/utf_bom.html
+
+                // Note that when we use utf-8, the BOM should appear as "EF BB BF", but it doesn't due to this bug in the JDK:
+                // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508058
+                if (line && line.length() && line.charAt(0) === 0xfeff) {
+                    // Eat the BOM, since we've already found the encoding on this file,
+                    // and we plan to concatenating this buffer with others; the BOM should
+                    // only appear at the top of a file.
+                    line = line.substring(1);
+                }
+
+                stringBuffer.append(line);
+
+                while ((line = input.readLine()) !== null) {
+                    stringBuffer.append(lineSeparator);
+                    stringBuffer.append(line);
+                }
+                //Make sure we return a JavaScript string and not a Java string.
+                content = String(stringBuffer.toString()); //String
+            } finally {
+                input.close();
+            }
+            callback(content);
+        };
+    }
+
+    requirejs.load = function (context, moduleName, url) {
+        var useXhr = context.config.useXhr || cajon.useXhr,
+            onXhr = context.config && context.config.onXhr;
+
+        if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
+            cajon.cget(url, function (content) {
+                //Determine if a wrapper is needed. First strip out comments.
+                //This is not bulletproof, but it is good enough for elminating
+                //false positives from comments.
+                var temp = content.replace(commentRegExp, '');
+
+                if (!defineRegExp.test(temp) && (requireRegExp.test(temp) ||
+                    exportsRegExp.test(temp))) {
+                    content = 'define(function(require, exports, module) {\n' +
+                              content +
+                              '\n});\n';
+                }
+
+                //IE with conditional comments on cannot handle the
+                //sourceURL trick, so skip it if enabled.
+                /*@if (@_jscript) @else @*/
+                content += "\r\n//@ sourceURL=" + url;
+                /*@end@*/
+
+                requirejs.exec(content);
+                context.completeLoad(moduleName);
+
+            }, function (err) {
+                throw err;
+            }, onXhr);
+        } else {
+            return oldLoad.apply(requirejs, arguments);
+        }
+    };
+
+}(requirejs));
