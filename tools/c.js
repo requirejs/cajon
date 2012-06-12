@@ -167,7 +167,9 @@ var cajon = requirejs;
 
                 if (!defineRegExp.test(temp) && (requireRegExp.test(temp) ||
                     exportsRegExp.test(temp))) {
-                    content = 'define(function(require, exports, module) {\n' +
+                    content = 'define(function(require, exports, module) {' +
+                              'var __filename = module.uri || "", ' +
+                              '__dirname = __filename.substring(0, __filename.lastIndexOf("/") + 1);\n' +
                               content +
                               '\n});\n';
                 }
