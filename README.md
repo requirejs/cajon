@@ -1,6 +1,6 @@
 # cajon
 
-[Cajon]() is a JavaScript module loader built on
+[Cajon](http://en.wikipedia.org/wiki/Caj%C3%B3n) is a JavaScript module loader built on
 [RequireJS](https://github.com/jrburke/requirejs) that can also load
 CommonJS/node modules from their source, in addition to AMD modules.
 
@@ -15,15 +15,21 @@ without needing a full runtime loader.
 
 Why use this instead of RequireJS? Some possible reasons:
 
-1) You cannot stand to use a wrapper like this around your module code:
-`define(function(require) {/*module code here */});`
+1) You cannot bring yourself to use a wrapper like this around your module
+code:
+
+```javascript
+define(function(require) {
+    /*module code here */
+});
+```
 
 2) You have a set of code already formatted in CommonJS/node style you
 want to reuse.
 
 Otherwise, you should be using RequireJS, or another AMD loader.
 
-Note the **Restrictions** secion below. You will likely gnash your
+Note the [Restrictions](#restrictions) section below. You will likely gnash your
 teeth in frustration if you do not heed them.
 
 If you do not like this particular loader, but like the idea of a
@@ -32,7 +38,7 @@ LinkedIn's [Inject](https://github.com/linkedin/inject) loader better.
 
 ## How does it work?
 
-Cajon is made up of:
+Cajon is constructed with:
 
 * RequireJS (needs 2.0.2 or later)
 * An override to requirejs.load that fetches scripts via async
@@ -58,29 +64,29 @@ define(function (require, exports, module) {
 });
 ```
 
-and it also allows the use of __dirname and __filename inside that
+and it allows the use of __dirname and __filename inside that
 wrapped code.
 
 Cajon assigns the `cajon` variable to the be same as the `requirejs`
 variable, so you can use that if you want to specifically call out the usage
-of cajon. However, note that the requirejs optimizer only understands uses
-of `require`, `requirejs` and `define`, it will not see `cajon` uses. This is
+of cajon. However, the requirejs optimizer only understands
+of `require`, `requirejs` and `define`, it will not understand `cajon`. This is
 particularly important if you are using the optimizer's `mainConfigFile`
 option.
 
 It is best to just use the global `require` if you want the code to be
-portable to RequireJS and almond, and only do detection of `cajon` if you
-want to know if cajon is available.
+portable to RequireJS, almond and other AMD loaders, and only do detection
+of `cajon` if you want to know if cajon is available.
 
 ## How to use it
 
 There is a `demo` directory that shows example use, but basically,
-put cajon.js in a `<script>` tag and load code via `require([])`. Note the
-**Restrictions** section below though.
+put cajon.js in a `<script>` tag and load modules via `require([])`.
+Note the [Restrictions](#restrictions) section below though.
 
 To optimize the demo, run:
 
-    node tools/r.js demo/app.build.js
+    node tools/r.js -o demo/app.build.js
 
 This will generate the optimized project in a `demo-built` directory. All
 the modules in the build output will have been converted to AMD style, so
@@ -143,7 +149,8 @@ require() supported by AMD loaders:
 var id = someCondition ? 'a' : 'b';
 require([id], function (mod) {
     //do something with mod now
-    //that it is loaded.
+    //that it has been asynchronously
+    //loaded and executed.
 })
 ```
 
