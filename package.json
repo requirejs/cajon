@@ -20,7 +20,7 @@
 
     "volo": {
         "url": "https://raw.github.com/requirejs/cajon/{version}/cajon.js"
-    }
+    },
 
     "engines": {
         "node": ">=0.4.0"
