@@ -1,8 +1,8 @@
 # cajon
 
-[Cajon](http://en.wikipedia.org/wiki/Caj%C3%B3n) is a JavaScript module loader built on
-[RequireJS](https://github.com/jrburke/requirejs) that can also load
-CommonJS/node modules from their source, in addition to AMD modules.
+[Cajon](http://en.wikipedia.org/wiki/Caj%C3%B3n) is a JavaScript module loader
+for the browser that can load CommonJS/node and AMD modules. It is built
+on top of [RequireJS](https://github.com/jrburke/requirejs).
 
 You can use it to code modules for your project in CommonJS/node style, then
 use the [RequireJS Optimizer](http://requirejs.org/docs/optimizer.html) to
