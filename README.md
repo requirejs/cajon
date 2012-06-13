@@ -97,6 +97,20 @@ The app.build.js build profile requires the r.js optimizer to be
 version 2.0.2 or later, because it uses 2.0.2's `cjsTranslate` build option
 that converts CommonJS/node modules to be define()-wrapped for the build.
 
+## Install
+
+If using [volo](https://github.com/volojs/volo):
+
+    volo add cajon
+
+If using npm:
+
+    npm install cajon
+
+Or URL to latest release:
+
+    https://raw.github.com/requirejs/cajon/latest/cajon.js
+
 ## Restrictions
 
 ### Does not use node's module ID-to-path rules
