@@ -6,13 +6,14 @@
 
 /*jslint sloppy: true, regexp: true */
 /*global location, XMLHttpRequest, ActiveXObject, process, require, Packages,
-java, requirejs */
+java, requirejs, document */
 var cajon = requirejs;
 (function (requirejs) {
     var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         defineRegExp = /(^|[^\.])define\s*\(/,
         requireRegExp = /(^|[^\.])require\s*\(\s*['"][^'"]+['"]\s*\)/,
         exportsRegExp = /exports\s*=\s*/,
+        sourceUrlRegExp = /\/\/@\s+sourceURL=/,
         progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
         hasLocation = typeof location !== 'undefined' && location.href,
         defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, ''),
@@ -155,8 +156,10 @@ var cajon = requirejs;
     }
 
     requirejs.load = function (context, moduleName, url) {
-        var useXhr = context.config.useXhr || cajon.useXhr,
-            onXhr = context.config && context.config.onXhr;
+        var useXhr = (context.config && context.config.cajon &&
+                     context.config.cajon.useXhr) || cajon.useXhr,
+            onXhr = (context.config && context.config.cajon &&
+                     context.config.cajon.onXhr);
 
         if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
             cajon.cget(url, function (content) {
@@ -174,11 +177,14 @@ var cajon = requirejs;
                               '\n});\n';
                 }
 
-                //IE with conditional comments on cannot handle the
-                //sourceURL trick, so skip it if enabled.
-                /*@if (@_jscript) @else @*/
-                content += "\r\n//@ sourceURL=" + url;
-                /*@end@*/
+                //Add sourceURL, but only if one is not already there.
+                if (!sourceUrlRegExp.test(content)) {
+                    //IE with conditional comments on cannot handle the
+                    //sourceURL trick, so skip it if enabled.
+                    /*@if (@_jscript) @else @*/
+                    content += "\r\n//@ sourceURL=" + url;
+                    /*@end@*/
+                }
 
                 requirejs.exec(content);
                 context.completeLoad(moduleName);

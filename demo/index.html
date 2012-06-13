@@ -8,11 +8,11 @@
         </style>
         <script src="../cajon.js"></script>
         <script>
-        cajon.config({
+        require.config({
             baseUrl: 'js'
         });
 
-        cajon(['jquery', 'lib'], function ($, lib) {
+        require(['jquery', 'lib'], function ($, lib) {
             $(function () {
                 var actual = '';
 
