@@ -22,6 +22,11 @@ var cajon = requirejs;
         oldLoad = requirejs.load,
         fs;
 
+    function exec(content) {
+        /*jslint evil: true */
+        return eval(content);
+    }
+
     cajon.cajonVersion = '0.0.2';
     cajon.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
@@ -186,7 +191,7 @@ var cajon = requirejs;
                     /*@end@*/
                 }
 
-                requirejs.exec(content);
+                exec(content);
                 context.completeLoad(moduleName);
 
             }, function (err) {
