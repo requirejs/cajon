@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.0.2 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.0.3 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -27,7 +27,7 @@ var cajon = requirejs;
         return eval(content);
     }
 
-    cajon.cajonVersion = '0.0.2';
+    cajon.cajonVersion = '0.0.3';
     cajon.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
