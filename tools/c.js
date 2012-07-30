@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.0.3 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.0.4 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -7,7 +7,6 @@
 /*jslint sloppy: true, regexp: true */
 /*global location, XMLHttpRequest, ActiveXObject, process, require, Packages,
 java, requirejs, document */
-var cajon = requirejs;
 (function (requirejs) {
     var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         defineRegExp = /(^|[^\.])define\s*\(/,
@@ -27,8 +26,8 @@ var cajon = requirejs;
         return eval(content);
     }
 
-    cajon.cajonVersion = '0.0.3';
-    cajon.createXhr = function () {
+    requirejs.cajonVersion = '0.0.4';
+    requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
         if (typeof XMLHttpRequest !== "undefined") {
@@ -50,7 +49,7 @@ var cajon = requirejs;
         return xhr;
     };
 
-    cajon.xdRegExp = /^((\w+)\:)?\/\/([^\/\\]+)/;
+    requirejs.xdRegExp = /^((\w+)\:)?\/\/([^\/\\]+)/;
 
     /**
      * Is an URL on another domain. Only works for browser use, returns
@@ -60,8 +59,8 @@ var cajon = requirejs;
      * @param {String} url
      * @returns Boolean
      */
-    cajon.useXhr = function (url, protocol, hostname, port) {
-        var match = cajon.xdRegExp.exec(url),
+    requirejs.useXhr = function (url, protocol, hostname, port) {
+        var match = requirejs.xdRegExp.exec(url),
             uProtocol, uHostName, uPort;
         if (!match) {
             return true;
@@ -84,7 +83,7 @@ var cajon = requirejs;
         //Using special require.nodeRequire, something added by r.js.
         fs = require.nodeRequire('fs');
 
-        cajon.cget = function (url, callback) {
+        requirejs.cget = function (url, callback) {
             var file = fs.readFileSync(url, 'utf8');
             //Remove BOM (Byte Mark Order) from utf8 files if it is there.
             if (file.indexOf('\uFEFF') === 0) {
@@ -92,9 +91,9 @@ var cajon = requirejs;
             }
             callback(file);
         };
-    } else if (cajon.createXhr()) {
-        cajon.cget = function (url, callback, errback, onXhr) {
-            var xhr = cajon.createXhr();
+    } else if (requirejs.createXhr()) {
+        requirejs.cget = function (url, callback, errback, onXhr) {
+            var xhr = requirejs.createXhr();
             xhr.open('GET', url, true);
 
             //Allow overrides specified in config
@@ -122,7 +121,7 @@ var cajon = requirejs;
         };
     } else if (typeof Packages !== 'undefined') {
         //Why Java, why is this so awkward?
-        cajon.cget = function (url, callback) {
+        requirejs.cget = function (url, callback) {
             var encoding = "utf-8",
                 file = new java.io.File(url),
                 lineSeparator = java.lang.System.getProperty("line.separator"),
@@ -162,12 +161,12 @@ var cajon = requirejs;
 
     requirejs.load = function (context, moduleName, url) {
         var useXhr = (context.config && context.config.cajon &&
-                     context.config.cajon.useXhr) || cajon.useXhr,
+                     context.config.cajon.useXhr) || requirejs.useXhr,
             onXhr = (context.config && context.config.cajon &&
                      context.config.cajon.onXhr);
 
         if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
-            cajon.cget(url, function (content) {
+            requirejs.cget(url, function (content) {
                 //Determine if a wrapper is needed. First strip out comments.
                 //This is not bulletproof, but it is good enough for elminating
                 //false positives from comments.
