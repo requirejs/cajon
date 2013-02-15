@@ -1860,7 +1860,7 @@ var requirejs, require, define;
     };
 
     /**
- * @license cajon 0.1.1 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.1.2 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -1873,6 +1873,7 @@ java, requirejs, document */
         defineRegExp = /(^|[^\.])define\s*\(/,
         requireRegExp = /(^|[^\.])require\s*\(\s*['"][^'"]+['"]\s*\)/,
         exportsRegExp = /exports\s*=\s*/,
+        exportsPropRegExp = /exports\.\S+\s*=\s*/,
         sourceUrlRegExp = /\/\/@\s+sourceURL=/,
         progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
         hasLocation = typeof location !== 'undefined' && location.href,
@@ -1887,7 +1888,7 @@ java, requirejs, document */
         return eval(content);
     }
 
-    requirejs.cajonVersion = '0.1.1';
+    requirejs.cajonVersion = '0.1.2';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -2034,7 +2035,7 @@ java, requirejs, document */
                 var temp = content.replace(commentRegExp, '');
 
                 if (!defineRegExp.test(temp) && (requireRegExp.test(temp) ||
-                    exportsRegExp.test(temp))) {
+                    exportsRegExp.test(temp) || exportsPropRegExp.test(temp))) {
                     content = 'define(function(require, exports, module) {' +
                               'var __filename = module.uri || "", ' +
                               '__dirname = __filename.substring(0, __filename.lastIndexOf("/") + 1);\n' +
