@@ -1879,7 +1879,7 @@ var requirejs, require, define;
     };
 
     /**
- * @license cajon 0.1.3 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.1.4 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -1900,14 +1900,19 @@ java, requirejs, document */
         defaultHostName = hasLocation && location.hostname,
         defaultPort = hasLocation && (location.port || undefined),
         oldLoad = requirejs.load,
+        hasOwn = Object.prototype.hasOwnProperty,
         fs;
+
+    function hasProp(obj, prop) {
+        return hasOwn.call(obj, prop);
+    }
 
     function exec(content) {
         /*jslint evil: true */
         return eval(content);
     }
 
-    requirejs.cajonVersion = '0.1.3';
+    requirejs.cajonVersion = '0.1.4';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -2053,7 +2058,8 @@ java, requirejs, document */
                 //false positives from comments.
                 var temp = content.replace(commentRegExp, '');
 
-                if (!defineRegExp.test(temp) && (requireRegExp.test(temp) ||
+                if ((!context.config.shim || !hasProp(context.config.shim, moduleName)) &&
+                    !defineRegExp.test(temp) && (requireRegExp.test(temp) ||
                     exportsRegExp.test(temp) || exportsPropRegExp.test(temp))) {
                     content = 'define(function(require, exports, module) {' +
                               'var __filename = module.uri || "", ' +

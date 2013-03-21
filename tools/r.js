@@ -1,5 +1,5 @@
 /**
- * @license r.js 2.1.5 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license r.js 2.1.5+ Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
@@ -20,7 +20,7 @@ var requirejs, require, define, xpcUtil;
 (function (console, args, readFileFunc) {
     var fileName, env, fs, vm, path, exec, rhinoContext, dir, nodeRequire,
         nodeDefine, exists, reqMain, loadedOptimizedLib, existsForNode, Cc, Ci,
-        version = '2.1.5',
+        version = '2.1.5+',
         jsSuffixRegExp = /\.js$/,
         commandOption = '',
         useLibLoaded = {},
@@ -2436,15 +2436,28 @@ var requirejs, require, define, xpcUtil;
         } else {
             def(moduleName, function () {
                 //Get the original name, since relative requires may be
-                //resolved differently in node (issue #202)
-                var originalName = hasProp(context.registry, moduleName) &&
-                            context.registry[moduleName].map.originalName;
+                //resolved differently in node (issue #202). Also, if relative,
+                //make it relative to the URL of the item requesting it
+                //(issue #393)
+                var dirName,
+                    map = hasProp(context.registry, moduleName) &&
+                            context.registry[moduleName].map,
+                    parentMap = map && map.parentMap,
+                    originalName = map && map.originalName;
+
+                if (originalName.charAt(0) === '.' && parentMap) {
+                    dirName = parentMap.url.split('/');
+                    dirName.pop();
+                    originalName = dirName.join('/') + '/' + originalName;
+                }
 
                 try {
                     return (context.config.nodeRequire || req.nodeRequire)(originalName);
                 } catch (e) {
-                    err = new Error('Calling node\'s require("' +
-                                        originalName + '") failed with error: ' + e);
+                    err = new Error('Tried loading "' + moduleName + '" at ' +
+                                     url + ' then tried node\'s require("' +
+                                        originalName + '") and it failed ' +
+                                     'with error: ' + e);
                     err.originalError = e;
                     err.moduleName = originalName;
                     return req.onError(err);
@@ -19946,8 +19959,20 @@ exports.describe_ast = function() {
 /*jslint plusplus: true */
 /*global define: false */
 
-define('parse', ['./esprima'], function (esprima) {
+define('parse', ['./esprima', 'lang'], function (esprima, lang) {
     'use strict';
+
+    function arrayToString(ary) {
+        var output = '[';
+        if (ary) {
+            ary.forEach(function (item, i) {
+                output += (i > 0 ? ',' : '') + '"' + lang.jsEscape(item) + '"';
+            });
+        }
+        output += ']';
+
+        return output;
+    }
 
     //This string is saved off because JSLint complains
     //about obj.arguments use, as 'reserved word'
@@ -20075,8 +20100,7 @@ define('parse', ['./esprima'], function (esprima) {
                     moduleDeps = [];
                 }
 
-                depString = moduleCall.deps.length ? '["' +
-                            moduleCall.deps.join('","') + '"]' : '[]';
+                depString = arrayToString(moduleCall.deps);
                 result += 'define("' + moduleCall.name + '",' +
                           depString + ');';
             }
@@ -20084,8 +20108,7 @@ define('parse', ['./esprima'], function (esprima) {
                 if (result) {
                     result += '\n';
                 }
-                depString = moduleDeps.length ? '["' + moduleDeps.join('","') +
-                            '"]' : '[]';
+                depString = arrayToString(moduleDeps);
                 result += 'define("' + moduleName + '",' + depString + ');';
             }
         }
@@ -22338,7 +22361,8 @@ define('requirePatch', [ 'env!env/file', 'pragma', 'parse', 'lang', 'logger', 'c
                                 return require._cacheReadAsync(url).then(function (text) {
                                     contents = text;
 
-                                    if (context.config.cjsTranslate) {
+                                    if (context.config.cjsTranslate &&
+                                        (!context.config.shim || !lang.hasProp(context.config.shim, moduleName))) {
                                         contents = commonJs.convert(url, contents);
                                     }
 
@@ -23234,7 +23258,8 @@ define('build', function (require) {
                         //For builds, if wanting cjs translation, do it now, so that
                         //the individual modules can be loaded cross domain via
                         //plain script tags.
-                        if (config.cjsTranslate) {
+                        if (config.cjsTranslate &&
+                            (!config.shim || !lang.hasProp(config.shim, moduleName))) {
                             fileContents = commonJs.convert(fileName, fileContents);
                         }
 
@@ -23697,7 +23722,8 @@ define('build', function (require) {
             throw new Error('"main" passed as an option, but the ' +
                             'supported option is called "name".');
         }
-        if (!config.name && !config.modules && !config.include && !config.cssIn) {
+        if (config.out && !config.name && !config.modules && !config.include &&
+                !config.cssIn) {
             throw new Error('Missing either a "name", "include" or "modules" ' +
                             'option');
         }
@@ -23723,7 +23749,8 @@ define('build', function (require) {
         if (config.appDir && config.out) {
             throw new Error('"appDir" is not compatible with "out". Use "dir" ' +
                             'instead. appDir is used to copy whole projects, ' +
-                            'where "out" is used to just optimize to one file.');
+                            'where "out" with "baseUrl" is used to just ' +
+                            'optimize to one file.');
         }
         if (config.out && config.dir) {
             throw new Error('The "out" and "dir" options are incompatible.' +
@@ -24214,7 +24241,8 @@ define('build', function (require) {
 
                                 currContents = text;
 
-                                if (config.cjsTranslate) {
+                                if (config.cjsTranslate &&
+                                    (!config.shim || !lang.hasProp(config.shim, moduleName))) {
                                     currContents = commonJs.convert(path, currContents);
                                 }
 
