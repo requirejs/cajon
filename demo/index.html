@@ -9,17 +9,10 @@
         <script src="../cajon.js"></script>
         <script>
         require.config({
-            baseUrl: 'js',
-            shim: {
-                shimDeal: {
-                    exports: 'shimDeal'
-                }
-            }
+            baseUrl: 'js'
         });
 
-        require(['jquery', 'lib', 'shimDeal'], function ($, lib, shimDeal) {
-            console.log('shimDeal\'s name is: ' + shimDeal.name);
-
+        require(['jquery', 'lib'], function ($, lib) {
             $(function () {
                 var actual = '';
 

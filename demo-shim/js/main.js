@@ -16,8 +16,9 @@ require.config({
     }
 });
 
-require(['backbone', 'shimDeal'], function (Backbone, shimDeal) {
-    console.log('shimDeal\'s name: ' + shimDeal.name);
+require(['backbone', 'shimDeal'], function (Backbone, sd) {
+    console.log('shimDeal\'s name: ' + sd.name);
+    console.log('shimDeal\'s global name: ' + shimDeal.name);
     console.log('Backbone is: ', Backbone);
     console.log('Backbone.$ is: ', Backbone.$);
 });

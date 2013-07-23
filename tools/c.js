@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.1.8 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.1.9 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -32,7 +32,7 @@ java, requirejs, document */
         return eval(content);
     }
 
-    requirejs.cajonVersion = '0.1.8';
+    requirejs.cajonVersion = '0.1.9';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -196,6 +196,13 @@ java, requirejs, document */
                     shimConfig = context.config.shim[moduleName];
                     if (shimConfig && shimConfig.exports) {
                         content += "\ndefine('" + moduleName + "', function() { return " + shimConfig.exports + "; });\n";
+
+                        // Make sure the script can been seen globally if it is
+                        // just a local var reference. Using a detection of a
+                        // dot in the exports value as shorthand for that.
+                        if (shimConfig.exports.indexOf('.') == -1) {
+                            content += '\nwindow.' + shimConfig.exports + ' = ' + shimConfig.exports + ';\n';
+                        }
                     }
                 }
 
