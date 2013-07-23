@@ -1905,7 +1905,7 @@ var requirejs, require, define;
     };
 
     /**
- * @license cajon 0.1.7 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.1.8 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -1938,7 +1938,7 @@ java, requirejs, document */
         return eval(content);
     }
 
-    requirejs.cajonVersion = '0.1.7';
+    requirejs.cajonVersion = '0.1.8';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -2082,7 +2082,8 @@ java, requirejs, document */
                 //Determine if a wrapper is needed. First strip out comments.
                 //This is not bulletproof, but it is good enough for elminating
                 //false positives from comments.
-                var temp = content.replace(commentRegExp, '');
+                var shimConfig,
+                    temp = content.replace(commentRegExp, '');
 
                 if ((!context.config.shim || !hasProp(context.config.shim, moduleName)) &&
                     !defineRegExp.test(temp) && (requireRegExp.test(temp) ||
@@ -2092,6 +2093,16 @@ java, requirejs, document */
                               '__dirname = __filename.substring(0, __filename.lastIndexOf("/") + 1);\n' +
                               content +
                               '\n});\n';
+                }
+
+                // Some shimmed libaries declare themselves as "var something = {}",
+                // and when that is is evaled, that var does not escape the evaled
+                // scope, so insert a define that can access it.
+                if (context.config.shim && hasProp(context.config.shim, moduleName)) {
+                    shimConfig = context.config.shim[moduleName];
+                    if (shimConfig && shimConfig.exports) {
+                        content += "\ndefine('" + moduleName + "', function() { return " + shimConfig.exports + "; });\n";
+                    }
                 }
 
                 //Add sourceURL, but only if one is not already there.
