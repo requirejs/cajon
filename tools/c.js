@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.1.9 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.1.10 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -21,7 +21,16 @@ java, requirejs, document */
         defaultPort = hasLocation && (location.port || undefined),
         oldLoad = requirejs.load,
         hasOwn = Object.prototype.hasOwnProperty,
+        docBase = document.location.href,
+        docOrigin = location.protocol + '//' + location.host,
         fs;
+
+    // Make sure docBase is a directory.
+    if (docBase.lastIndexOf('/') !== docBase.length - 1) {
+        docBase = docBase.split('/');
+        docBase.pop();
+        docBase = docBase.join('/') + '/';
+    }
 
     function hasProp(obj, prop) {
         return hasOwn.call(obj, prop);
@@ -32,7 +41,7 @@ java, requirejs, document */
         return eval(content);
     }
 
-    requirejs.cajonVersion = '0.1.9';
+    requirejs.cajonVersion = '0.1.10';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -176,7 +185,7 @@ java, requirejs, document */
                 //Determine if a wrapper is needed. First strip out comments.
                 //This is not bulletproof, but it is good enough for elminating
                 //false positives from comments.
-                var shimConfig,
+                var shimConfig, sourceUrl,
                     temp = content.replace(commentRegExp, '');
 
                 if ((!context.config.shim || !hasProp(context.config.shim, moduleName)) &&
@@ -208,10 +217,16 @@ java, requirejs, document */
 
                 //Add sourceURL, but only if one is not already there.
                 if (!sourceUrlRegExp.test(content)) {
+                    sourceUrl = url;
+                    if (sourceUrl.indexOf('/') === 0) {
+                        sourceUrl = docOrigin + sourceUrl;
+                    } else if (sourceUrl.indexOf(':') === -1) {
+                        sourceUrl = docBase + sourceUrl;
+                    }
                     //IE with conditional comments on cannot handle the
                     //sourceURL trick, so skip it if enabled.
                     /*@if (@_jscript) @else @*/
-                    content += "\r\n//@ sourceURL=" + url;
+                    content += "\r\n//@ sourceURL=" + sourceUrl;
                     /*@end@*/
                 }
 
