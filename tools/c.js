@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.1.13 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.1.14 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -41,7 +41,7 @@ java, requirejs, document */
         return eval(content);
     }
 
-    requirejs.cajonVersion = '0.1.13';
+    requirejs.cajonVersion = '0.1.14';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -223,11 +223,8 @@ java, requirejs, document */
                     } else if (sourceUrl.indexOf(':') === -1) {
                         sourceUrl = docBase + sourceUrl;
                     }
-                    //IE with conditional comments on cannot handle the
-                    //sourceURL trick, so skip it if enabled.
-                    /*@if (@_jscript) @else @*/
-                    content += "\r\n//@ sourceURL=" + sourceUrl;
-                    /*@end@*/
+
+                    content += "\r\n//# sourceURL=" + sourceUrl;
                 }
 
                 exec(content);
