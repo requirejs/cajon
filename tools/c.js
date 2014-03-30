@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.1.14 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.2.0 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -7,7 +7,7 @@
 /*jslint sloppy: true, regexp: true */
 /*global location, XMLHttpRequest, ActiveXObject, process, require, Packages,
 java, requirejs, document */
-(function (requirejs) {
+(function (requirejs, global) {
     var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         defineRegExp = /(^|[^\.])define\s*\(/,
         requireRegExp = /(^|[^\.])require\s*\(\s*['"][^'"]+['"]\s*\)/,
@@ -38,10 +38,10 @@ java, requirejs, document */
 
     function exec(content) {
         /*jslint evil: true */
-        return eval(content);
+        return global.eval(content);
     }
 
-    requirejs.cajonVersion = '0.1.14';
+    requirejs.cajonVersion = '0.2.0';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -238,4 +238,4 @@ java, requirejs, document */
         }
     };
 
-}(requirejs));
+}(requirejs, this));
