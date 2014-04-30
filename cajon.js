@@ -1920,7 +1920,7 @@ var requirejs, require, define;
     };
 
     /**
- * @license cajon 0.2.0 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.2.1 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -1962,7 +1962,7 @@ java, requirejs, document */
         return global.eval(content);
     }
 
-    requirejs.cajonVersion = '0.2.0';
+    requirejs.cajonVersion = '0.2.1';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -2101,7 +2101,9 @@ java, requirejs, document */
             onXhr = (context.config && context.config.cajon &&
                      context.config.cajon.onXhr);
 
-        if (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort)) {
+        // If not a data URL, and should use XHR, fetch it.
+        if (url.indexOf('data:') !== 0 &&
+            (!hasLocation || useXhr(url, defaultProtocol, defaultHostName, defaultPort))) {
             requirejs.cget(url, function (content) {
                 //Determine if a wrapper is needed. First strip out comments.
                 //This is not bulletproof, but it is good enough for elminating
