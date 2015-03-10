@@ -1950,6 +1950,7 @@ java, requirejs, document */
         exportsRegExp = /exports\s*=\s*/,
         exportsPropRegExp = /exports\.\S+\s*=\s*/,
         sourceUrlRegExp = /\/\/@\s+sourceURL=/,
+        sourceMappingUrlRegExp = /(\/\/#\s+sourceMappingURL=[^\n\r]*)/g,
         progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
         hasLocation = typeof location !== 'undefined' && location.href,
         defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, ''),
@@ -2123,7 +2124,7 @@ java, requirejs, document */
                 //Determine if a wrapper is needed. First strip out comments.
                 //This is not bulletproof, but it is good enough for elminating
                 //false positives from comments.
-                var shimConfig, sourceUrl,
+                var shimConfig, sourceMappingUrl, sourceUrl,
                     temp = content.replace(commentRegExp, '');
 
                 if ((!context.config.shim || !hasProp(context.config.shim, moduleName)) &&
@@ -2131,7 +2132,7 @@ java, requirejs, document */
                     exportsRegExp.test(temp) || exportsPropRegExp.test(temp))) {
                     content = 'define(function(require, exports, module) {' +
                               'var __filename = module.uri || "", ' +
-                              '__dirname = __filename.substring(0, __filename.lastIndexOf("/") + 1);\n' +
+                              '__dirname = __filename.substring(0, __filename.lastIndexOf("/") + 1);' +
                               content +
                               '\n});\n';
                 }
@@ -2151,6 +2152,13 @@ java, requirejs, document */
                             content += '\nwindow.' + shimConfig.exports + ' = ' + shimConfig.exports + ';\n';
                         }
                     }
+                }
+
+                // If a sourceMappingURL is present, move it to the end.
+                sourceMappingUrl = content.match(sourceMappingUrlRegExp);
+                if (sourceMappingUrl) {
+                    content = content.replace(sourceMappingUrlRegExp, '');
+                    content += '\n' + sourceMappingUrl;
                 }
 
                 //Add sourceURL, but only if one is not already there.
