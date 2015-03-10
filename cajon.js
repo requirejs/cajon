@@ -1935,7 +1935,7 @@ var requirejs, require, define;
     };
 
     /**
- * @license cajon 0.2.6 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
+ * @license cajon 0.2.7 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/cajon for details
  */
@@ -1978,7 +1978,7 @@ java, requirejs, document */
         return global.eval(content);
     }
 
-    requirejs.cajonVersion = '0.2.6';
+    requirejs.cajonVersion = '0.2.7';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
