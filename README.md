@@ -5,7 +5,7 @@ for the browser that can load CommonJS/node and AMD modules. It is built
 on top of [RequireJS](https://github.com/jrburke/requirejs).
 
 You can use it to code modules for your project in CommonJS/node style, then
-use the [RequireJS Optimizer](http://requirejs.org/docs/optimizer.html) to
+use the [RequireJS Optimizer](http://requirejs.org/docs/optimization.html) to
 build all the modules into an AMD-compliant bundle. This allows you to
 then use a small AMD API shim, like
 [almond](https://github.com/jrburke/almond), to get nicely optimized code
