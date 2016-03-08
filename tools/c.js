@@ -1,7 +1,6 @@
 /**
- * @license cajon 0.2.13 Copyright (c) 2012, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/requirejs/cajon for details
+ * @license cajon 0.2.13 Copyright jQuery Foundation and other contributors.
+ * Released under MIT license, http://github.com/requirejs/cajon/LICENSE
  */
 
 /*jslint sloppy: true, regexp: true */

@@ -5,16 +5,7 @@
     "homepage": "http://github.com/requirejs/cajon",
     "author": "James Burke <jrburke@gmail.com> (http://github.com/jrburke)",
 
-    "licenses": [
-        {
-            "type": "BSD",
-            "url": "https://github.com/requirejs/cajon/blob/master/LICENSE"
-        },
-        {
-            "type": "MIT",
-            "url": "https://github.com/requirejs/cajon/blob/master/LICENSE"
-        }
-    ],
+    "license": "MIT",
 
     "repository": {
         "type": "git",

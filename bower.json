@@ -18,5 +18,5 @@
     "package.json",
     ".npmignore"
   ],
-  "license": "new BSD, and MIT"
+  "license": "MIT"
 }
