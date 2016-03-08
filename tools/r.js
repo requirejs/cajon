@@ -1,5 +1,5 @@
 /**
- * @license r.js 2.1.22 Copyright (c) 2010-2015, The Dojo Foundation All Rights Reserved.
+ * @license r.js 2.1.22+ Copyright (c) 2010-2015, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
@@ -20,7 +20,7 @@ var requirejs, require, define, xpcUtil;
 (function (console, args, readFileFunc) {
     var fileName, env, fs, vm, path, exec, rhinoContext, dir, nodeRequire,
         nodeDefine, exists, reqMain, loadedOptimizedLib, existsForNode, Cc, Ci,
-        version = '2.1.22',
+        version = '2.1.22+',
         jsSuffixRegExp = /\.js$/,
         commandOption = '',
         useLibLoaded = {},
@@ -249,9 +249,8 @@ var requirejs, require, define, xpcUtil;
     }
 
     /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS 2.1.22 Copyright (c) 2010-2015, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/jrburke/requirejs for details
+ * @license RequireJS 2.1.22 Copyright jQuery Foundation and other contributors.
+ * Released under MIT license, http://github.com/requirejs/requirejs/LICENSE
  */
 //Not using strict: uneven strict support in browsers, #392, and causes
 //problems with requirejs.exec()/transpiler plugins that may not be strict.
@@ -270,7 +269,6 @@ var requirejs, require, define, xpcUtil;
         op = Object.prototype,
         ostring = op.toString,
         hasOwn = op.hasOwnProperty,
-        ap = Array.prototype,
         isBrowser = !!(typeof window !== 'undefined' && typeof navigator !== 'undefined' && window.document),
         isWebWorker = !isBrowser && typeof importScripts !== 'undefined',
         //PS3 indicates loaded and complete, but need to wait for complete
@@ -2159,11 +2157,11 @@ var requirejs, require, define, xpcUtil;
             if (node.attachEvent &&
                     //Check if node.attachEvent is artificially added by custom script or
                     //natively supported by browser
-                    //read https://github.com/jrburke/requirejs/issues/187
+                    //read https://github.com/requirejs/requirejs/issues/187
                     //if we can NOT find [native code] then it must NOT natively supported.
                     //in IE8, node.attachEvent does not have toString()
                     //Note the test for "[native code" with no closing brace, see:
-                    //https://github.com/jrburke/requirejs/issues/273
+                    //https://github.com/requirejs/requirejs/issues/273
                     !(node.attachEvent.toString && node.attachEvent.toString().indexOf('[native code') < 0) &&
                     !isOpera) {
                 //Probably IE. IE (at least 6-8) do not fire
@@ -2212,6 +2210,11 @@ var requirejs, require, define, xpcUtil;
                 //are in play, the expectation is that a build has been done so
                 //that only one script needs to be loaded anyway. This may need
                 //to be reevaluated if other use cases become common.
+
+                // Post a task to the event loop to work around a bug in WebKit
+                // where the worker gets garbage-collected after calling
+                // importScripts(): https://webkit.org/b/153317
+                setTimeout(function() {}, 0);
                 importScripts(url);
 
                 //Account for anonymous modules
@@ -29289,7 +29292,9 @@ define('requirePatch', [ 'env!env/file', 'pragma', 'parse', 'lang', 'logger', 'c
         // Used to strip out use strict from toString()'d functions for the
         // shim config since they will explicitly want to not be bound by strict,
         // but some envs, explicitly xpcshell, adds a use strict.
-        useStrictRegExp = /['"]use strict['"];/g;
+        useStrictRegExp = /['"]use strict['"];/g,
+        //Absolute path if starts with /, \, or x:
+        absoluteUrlRegExp = /^[\/\\]|^\w:/;
 
     //Turn off throwing on resolution conflict, that was just an older prim
     //idea about finding errors early, but does not comply with how promises
@@ -29356,8 +29361,10 @@ define('requirePatch', [ 'env!env/file', 'pragma', 'parse', 'lang', 'logger', 'c
         };
 
         function normalizeUrlWithBase(context, moduleName, url) {
-            //Adjust the URL if it was not transformed to use baseUrl.
-            if (require.jsExtRegExp.test(moduleName)) {
+            //Adjust the URL if it was not transformed to use baseUrl, but only
+            //if the URL is not already an absolute path.
+            if (require.jsExtRegExp.test(moduleName) &&
+                !absoluteUrlRegExp.test(url)) {
                 url = (context.config.dir || context.config.dirBaseUrl) + url;
             }
             return url;
