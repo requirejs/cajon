@@ -220,5 +220,5 @@ require.config({
 
 ## License
 
-MIT and new BSD.
+MIT
 
