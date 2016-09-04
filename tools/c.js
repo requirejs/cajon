@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.3.0 Copyright jQuery Foundation and other contributors.
+ * @license cajon 0.4.0 Copyright jQuery Foundation and other contributors.
  * Released under MIT license, http://github.com/requirejs/cajon/LICENSE
  */
 
@@ -7,7 +7,7 @@
 /*global location, XMLHttpRequest, ActiveXObject, process, require, Packages,
 java, requirejs, document */
 (function (requirejs, global) {
-    var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
+    var commentRegExp = /\/\*[\s\S]*?\*\/|([^:"'=]|^)\/\/.*$/mg,
         defineRegExp = /(^|[^\.])define\s*\(/,
         requireRegExp = /(^|[^\.])require\s*\(\s*['"][^'"]+['"]\s*\)/,
         exportsRegExp = /exports\s*=\s*/,
@@ -25,6 +25,11 @@ java, requirejs, document */
         docOrigin = location.protocol + '//' + location.host,
         fs;
 
+    //Could match something like ')//comment', do not lose the prefix to comment.
+    function commentReplace(match, singlePrefix) {
+        return singlePrefix || '';
+    }
+
     // Make sure docBase is a directory.
     if (docBase.lastIndexOf('/') !== docBase.length - 1) {
         docBase = docBase.split('/');
@@ -41,7 +46,7 @@ java, requirejs, document */
         return global.eval(content);
     }
 
-    requirejs.cajonVersion = '0.3.0';
+    requirejs.cajonVersion = '0.4.0';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
@@ -188,7 +193,7 @@ java, requirejs, document */
                 //This is not bulletproof, but it is good enough for elminating
                 //false positives from comments.
                 var shimConfig, sourceMappingUrl, sourceUrl,
-                    temp = content.replace(commentRegExp, '');
+                    temp = content.replace(commentRegExp, commentReplace);
 
                 if ((!context.config.shim || !hasProp(context.config.shim, moduleName)) &&
                     !defineRegExp.test(temp) && (requireRegExp.test(temp) ||
