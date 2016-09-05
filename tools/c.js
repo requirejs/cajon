@@ -1,5 +1,5 @@
 /**
- * @license cajon 0.4.0 Copyright jQuery Foundation and other contributors.
+ * @license cajon 0.4.1 Copyright jQuery Foundation and other contributors.
  * Released under MIT license, http://github.com/requirejs/cajon/LICENSE
  */
 
@@ -46,7 +46,7 @@ java, requirejs, document */
         return global.eval(content);
     }
 
-    requirejs.cajonVersion = '0.4.0';
+    requirejs.cajonVersion = '0.4.1';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
