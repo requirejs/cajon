@@ -1,5 +1,5 @@
 /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS 2.3.4 Copyright jQuery Foundation and other contributors.
+ * @license RequireJS 2.3.5 Copyright jQuery Foundation and other contributors.
  * Released under MIT license, https://github.com/requirejs/requirejs/blob/master/LICENSE
  */
 //Not using strict: uneven strict support in browsers, #392, and causes
@@ -11,7 +11,7 @@ var requirejs, require, define;
 (function (global, setTimeout) {
     var req, s, head, baseElement, dataMain, src,
         interactiveScript, currentlyAddingScript, mainScript, subPath,
-        version = '2.3.4',
+        version = '2.3.5',
         commentRegExp = /\/\*[\s\S]*?\*\/|([^:"'=]|^)\/\/.*$/mg,
         cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
         jsSuffixRegExp = /\.js$/,
@@ -1991,7 +1991,7 @@ var requirejs, require, define;
     };
 
     /**
- * @license cajon 0.4.4 Copyright jQuery Foundation and other contributors.
+ * @license cajon 0.4.5 Copyright jQuery Foundation and other contributors.
  * Released under MIT license, http://github.com/requirejs/cajon/LICENSE
  */
 
@@ -2038,7 +2038,7 @@ java, requirejs, document */
         return global.eval(content);
     }
 
-    requirejs.cajonVersion = '0.4.4';
+    requirejs.cajonVersion = '0.4.5';
     requirejs.createXhr = function () {
         //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
         var xhr, i, progId;
